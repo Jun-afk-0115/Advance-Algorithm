@@ -1,0 +1,194 @@
+def generate_ic_hash(ic_number: str) -> int:
+    """
+    Generates a hash code for a Malaysian IC Number using a folding technique.
+
+    The Malaysian IC Number is a 12-digit string without dashes, following the format YYMMDDSSXXXX:
+    - YYMMDD:  Birth date (Year, Month, Day) - first 6 digits.
+    - SS:      State code of birth - next 2 digits.
+    - XXXX:    Sequence number - last 4 digits.
+
+    Args:
+        ic_number (str): The 12-digit Malaysian IC Number (e.g., "780101141234").
+
+    Returns:
+        int: The generated hash code. Returns -1 if the input is invalid.
+    """
+    # --- Input Validation ---
+    if not isinstance(ic_number, str):
+        # Changed to return -1 for consistency with error handling in example usage
+        return -1
+    if len(ic_number) != 12:
+        return -1
+    if not ic_number.isdigit():
+        return -1
+
+    # --- Folding Technique: Extract and Sum Parts ---
+    try:
+        # Extract the birth date part (YYMMDD)
+        birth_date_part = int(ic_number[0:6])
+        # Extract the state code part (SS)
+        state_code_part = int(ic_number[6:8])
+        # Extract the sequence number part (XXXX)
+        sequence_number_part = int(ic_number[8:12])
+    except ValueError:
+        # This case should ideally be caught by .isdigit() but is here as a safeguard.
+        return -1
+
+    # Sum the extracted numerical parts. This is the core folding operation.
+    folded_sum = birth_date_part + state_code_part + sequence_number_part
+
+    # --- Modulo Operation for Hash Code Generation ---
+    # To keep the hash code within a manageable and consistent range,
+    # and to further distribute the hash values, a modulo operation is applied.
+    # Using a large prime number for the modulo can help reduce collisions
+    # for a simple hash function.
+    HASH_MODULO = 1000003  # A large prime number
+
+    hash_code = folded_sum % HASH_MODULO
+
+    return hash_code
+
+def get_birth_place_from_ic(ic_number: str) -> str:
+    """
+    Determines the Malaysian state or country of birth from an IC number's state code.
+
+    Args:
+        ic_number (str): The 12-digit Malaysian IC Number (e.g., "780101141234").
+
+    Returns:
+        str: The name of the Malaysian state or country of birth, or "Invalid IC Number"
+             if the input is invalid, or "Unknown State/Country Code" if the code is not found.
+    """
+    # --- Input Validation (similar to hash function) ---
+    if not isinstance(ic_number, str) or len(ic_number) != 12 or not ic_number.isdigit():
+        return "Invalid IC Number"
+
+    state_code = ic_number[6:8]
+
+    # --- Mapping State/Country Codes ---
+    birth_places = {
+        # Malaysian States
+        "01": "Johor", "21": "Johor", "22": "Johor", "23": "Johor", "24": "Johor",
+        "02": "Kedah", "25": "Kedah", "26": "Kedah", "27": "Kedah",
+        "03": "Kelantan", "28": "Kelantan", "29": "Kelantan",
+        "04": "Malacca", "30": "Malacca",
+        "05": "Negeri Sembilan", "31": "Negeri Sembilan", "59": "Negeri Sembilan",
+        "06": "Pahang", "32": "Pahang", "33": "Pahang",
+        "07": "Penang", "34": "Penang", "35": "Penang",
+        "08": "Perak", "36": "Perak", "37": "Perak", "38": "Perak", "39": "Perak",
+        "09": "Perlis", "40": "Perlis",
+        "10": "Selangor", "41": "Selangor", "42": "Selangor", "43": "Selangor", "44": "Selangor",
+        "11": "Terengganu", "45": "Terengganu", "46": "Terengganu",
+        "12": "Sabah", "47": "Sabah", "48": "Sabah", "49": "Sabah",
+        "13": "Sarawak", "50": "Sarawak", "51": "Sarawak", "52": "Sarawak", "53": "Sarawak",
+        "14": "Federal Territory of Kuala Lumpur", "54": "Federal Territory of Kuala Lumpur", "55": "Federal Territory of Kuala Lumpur", "56": "Federal Territory of Kuala Lumpur", "57": "Federal Territory of Kuala Lumpur",
+        "15": "Federal Territory of Labuan", "58": "Federal Territory of Labuan",
+        "16": "Federal Territory of Putrajaya",
+
+        # Country Codes
+        "60": "Brunei",
+        "61": "Indonesia",
+        "62": "Cambodia / Democratic Kampuchea / Kampuchea",
+        "63": "Laos",
+        "64": "Myanmar",
+        "65": "Philippines",
+        "66": "Singapore",
+        "67": "Thailand",
+        "68": "Vietnam",
+        "69": "N/A", # As per provided list
+        "70": "N/A", # As per provided list
+        "71": "A person born outside Malaysia prior to 2001",
+        "72": "A person born outside Malaysia prior to 2001",
+        "73": "N/A", # As per provided list
+        "74": "China",
+        "75": "India",
+        "76": "Pakistan",
+        "77": "Saudi Arabia",
+        "78": "Sri Lanka",
+        "79": "Bangladesh",
+        "80": "N/A", # As per provided list
+        "81": "N/A", # As per provided list
+        "82": "Unknown state",
+        "83": "American Samoa / Asia-Pacific / Australia / Christmas Island / Cocos (Keeling) Islands / Cook Islands / Fiji / French Polynesia / Guam / Heard Island and McDonald Islands / Marshall Islands / Micronesia / New Caledonia / New Zealand / Niue / Norfolk Island / Papua New Guinea / Timor Leste / Tokelau / United States Minor Outlying Islands / Wallis and Funatuna Islands",
+        "84": "Anguilla / Argentina / Aruba / Bolivia / Brazil / Chile / Colombia / Ecuador / French Guinea / Guadeloupe / Guyana / Paraguay / Peru / South America / South Georgia and the South Sandwich Islands / Suriname / Uruguay / Venezuela",
+        "85": "Africa / Algeria / Angola / Botswana / Burundi / Cameroon / Central African Republic / Chad / Congo-Brazzaville / Congo-Kinshasa / Djibouti / Egypt / Eritrea / Ethiopia / Gabon / Gambia / Ghana / Guinea / Kenya / Liberia / Malawi / Mali / Mauritania / Mayotte / Morocco / Mozambique / Namibia / Niger / Nigeria / Rwanda / Réunion / Senegal / Sierra Leone / Somalia / South Africa / Sudan / Swaziland / Tanzania / Togo / Tonga / Tunisia / Uganda / Western Sahara / Zaire / Zambia / Zimbabwe",
+        "86": "Armenia / Austria / Belgium / Cyprus / Denmark / Europe / Faroe Islands / France / Finland / Finland, Metropolitan / Germany / Germany, Democratic Republic / Germany, Federal Republic / Greece / Holy See (Vatican City) / Italy / Luxembourg / Macedonia / Malta / Mediterranean / Monaco / Netherlands / Norway / Portugal / Republic of Moldova / Slovakia / Slovenia / Spain / Sweden / Switzerland / United Kingdom-Dependent Territories / United Kingdom-National Overseas / United Kingdom-Overseas Citizen / United Kingdom-Protected Person / United Kingdom-Subject",
+        "87": "Britain / Great Britain / Ireland",
+        "88": "Bahrain / Iran / Iraq / Palestine / Jordan / Kuwait / Lebanon / Middle East / Oman / Qatar / Republic of Yemen / Syria / Turkey / United Arab Emirates / Yemen Arab Republic / Yemen People’s Democratic Republic",
+        "89": "Far East / Japan / North Korea / South Korea / Taiwan",
+        "90": "Bahamas / Barbados / Belize / Caribbean / Costa Rica / Cuba / Dominica / Dominican Republic / El Salvador / Grenada / Guatemala / Haiti / Honduras / Jamaica / Martinique / Mexico / Nicaragua / Panama / Puerto Rico / Saint Kitts and Nevis / Saint Lucia / Saint Vincent and the Grenadines / Trinidad and Tobago / Turks and Caicos Islands / Virgin Islands (USA)",
+        "91": "Canada / Greenland / Netherlands Antilles / North America / Saint Pierre and Miquelon / United States of America",
+        "92": "Albania / Belarus / Bosnia and Herzegovina / Bulgaria / Byelorussia / Croatia / Czech Republic / Czechoslovakia / Estonia / Georgia / Hungary / Latvia / Lithuania / Montenegro / Poland / Republic of Kosovo / Romania / Russian Federation / Serbia / Soviet Union / U.S.S.R. / Ukraine",
+        "93": "Afghanistan / Andorra / Antarctica / Antigua and Barbuda / Azerbaijan / Benin / Bermuda / Bhutan / Bora Bora / Bouvet Island / British Indian Ocean Territory / Burkina Faso / Cape Verde / Cayman Islands / Comoros / Dahomey / Equatorial Guinea / Falkland Islands / French Southern Territories / Gibraltar / Guinea-Bissau / Hong Kong / Iceland / Ivory Coast / Kazakhstan / Kiribati / Kyrgyzstan / Lesotho / Libya / Liechtenstein / Macau / Madagascar / Maghribi / Malagasy / Maldives / Mauritius / Mongolia / Montserrat / Nauru / Nepal / Northern Marianas Islands / Outer Mongolia / Palau / Palestine / Pitcairn Islands / Saint Helena / Saint Lucia / Saint Vincent and the Grenadines / Samoa / San Marino / São Tomé and Príncipe / Seychelles / Solomon Islands / Svalbard and Jan Mayen Islands / Tajikistan / Turkmenistan / Tuvalu / Upper Volta / Uzbekistan / Vanuatu / Vatican City / Virgin Islands (British) / Western Samoa / Yugoslavia",
+        "99": "Mecca / Neutral Zone / No Information / Refugee / Refugee Article 1/1951 / United Nations Specialized Agency / United Nations Organization / Unspecified Nationality",
+        "94": "N/A", # As per provided list
+        "95": "N/A", # As per provided list
+        "96": "N/A", # As per provided list
+        "97": "N/A", # As per provided list
+        "98": "Stateless / Stateless Person Article 1/1954",
+    }
+
+    return birth_places.get(state_code, "Unknown State/Country Code")
+
+
+# --- Example Usage ---
+# Function to print formatted output
+def print_ic_info(ic_number, hash_code, birth_place):
+    # Determine the status based on hash_code and birth_place
+    status = ""
+    if hash_code == -1:
+        status = "Invalid IC Number (Hash Error)"
+    elif birth_place == "Invalid IC Number":
+        status = "Invalid IC Number (Birth Place Error)"
+    elif birth_place == "Unknown State/Country Code":
+        status = "Unknown State/Country Code"
+
+    if status:
+        print(f"IC: {ic_number:<12} -> Status: {status}")
+    else:
+        print(f"IC: {ic_number:<12} -> Hash Code: {hash_code:<7} -> Birth Place: {birth_place}")
+
+
+# Example 1: Valid IC number
+ic_num1 = "780101141234"
+hash1 = generate_ic_hash(ic_num1)
+birth_place1 = get_birth_place_from_ic(ic_num1)
+print_ic_info(ic_num1, hash1, birth_place1)
+
+# Example 2: Another valid IC number
+ic_num2 = "920515087890"
+hash2 = generate_ic_hash(ic_num2)
+birth_place2 = get_birth_place_from_ic(ic_num2)
+print_ic_info(ic_num2, hash2, birth_place2)
+
+# Example 3: IC number with invalid length
+ic_num3 = "12345"
+hash3 = generate_ic_hash(ic_num3)
+birth_place3 = get_birth_place_from_ic(ic_num3)
+print_ic_info(ic_num3, hash3, birth_place3)
+
+# Example 4: IC number with non-digit characters
+ic_num4 = "85123101ABCD"
+hash4 = generate_ic_hash(ic_num4)
+birth_place4 = get_birth_place_from_ic(ic_num4)
+print_ic_info(ic_num4, hash4, birth_place4)
+
+# Example 5: IC number that is not a string
+ic_num5 = 123456789012
+# For this case, the input to generate_ic_hash and get_birth_place_from_ic will fail validation immediately
+# and return -1 or "Invalid IC Number".
+hash5 = generate_ic_hash(ic_num5)
+birth_place5 = get_birth_place_from_ic(str(ic_num5)) # Convert to string for consistent type handling
+print_ic_info(ic_num5, hash5, birth_place5)
+
+# Example 6: IC number with a state code for an outside country (e.g., Singapore)
+ic_num6 = "800203665678"
+hash6 = generate_ic_hash(ic_num6)
+birth_place6 = get_birth_place_from_ic(ic_num6)
+print_ic_info(ic_num6, hash6, birth_place6)
+
+# Example 7: IC number with an unknown state code (for demonstration)
+ic_num7 = "900707991122" # Using '99' as an example for unknown/specific cases
+hash7 = generate_ic_hash(ic_num7)
+birth_place7 = get_birth_place_from_ic(ic_num7)
+print_ic_info(ic_num7, hash7, birth_place7)
