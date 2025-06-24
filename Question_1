@@ -1,7 +1,7 @@
 import random
 from collections import defaultdict
 
-# === Keep Code 1: Hash + Birthplace ===
+# === Code 1: Hash & Format ===
 def get_birthplace(bp_code):
     state_codes = {
         "01": "Johor", "21": "Johor", "22": "Johor", "23": "Johor", "24": "Johor",
@@ -40,17 +40,8 @@ def ic_hash(ic_number, table_size):
 def format_ic(ic_number):
     return f"{ic_number[:6]}-{ic_number[6:8]}-{ic_number[8:]}"
 
-def display_ic_info(ic_number, table_size):
-    formatted = format_ic(ic_number)
-    bp_code = ic_number[6:8]
-    birthplace = get_birthplace(bp_code)
-    hash_code = ic_hash(ic_number, table_size)
-    print(f"Formatted IC: {formatted}")
-    print(f"Place of Birth: {birthplace}")
-    print(f"Hash Code (mod {table_size}): {hash_code}")
 
-# === New for Code 2: Random generation + experiment ===
-
+# === IC Generator ===
 valid_bp_codes = [
     "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14",
     "15", "16", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
@@ -68,28 +59,55 @@ def generate_random_ic():
     suffix = random.randint(0, 9999)
     return f"{yy:02}{mm:02}{dd:02}{bp}{suffix:04}"
 
-def insert_with_chaining(ic_list, table_size):
+def insert_and_show_table(ic_list, table_size):
     table = defaultdict(list)
     collisions = 0
+
     for ic in ic_list:
         index = ic_hash(ic, table_size)
         if table[index]:
             collisions += 1
         table[index].append(ic)
+
+    print(f"\nHash Table with size {table_size}:")
+    for i in range(table_size):
+        if i in table:
+            line = f"table[{i}] --> " + " --> ".join(table[i])
+        else:
+            line = f"table[{i}]"
+        print(line)
+
     return collisions
 
-def run_rounds(rounds=10, num_ics=1000):
-    table_sizes = [1009, 2003]
-    for size in table_sizes:
-        print(f"\nHash Table Size: {size}")
-        total = 0
-        for i in range(1, rounds + 1):
-            ic_list = [generate_random_ic() for _ in range(num_ics)]
-            collisions = insert_with_chaining(ic_list, size)
-            print(f"  Round {i}: Collisions = {collisions}")
-            total += collisions
-        print(f"  ➤ Average Collisions: {total / rounds:.2f}")
+# === Main Run for Code 3 ===
+def run_rounds(rounds=10):
+    table1_size = 1009
+    table2_size = 2003
+    total_collisions_1009 = 0
+    total_collisions_2003 = 0
 
-# === Run experiment ===
+    for round_num in range(1, rounds + 1):
+        print(f"\n=== Round {round_num} ===")
+
+        # Table 1009 run
+        ic_list_1009 = [generate_random_ic() for _ in range(1008)]
+        collisions_1009 = insert_and_show_table(ic_list_1009, table1_size)
+        print(f"\nTotal Collisions for Table 1009 (Round {round_num}): {collisions_1009}")
+        total_collisions_1009 += collisions_1009
+
+        # Table 2003 run
+        ic_list_2003 = [generate_random_ic() for _ in range(2002)]
+        collisions_2003 = insert_and_show_table(ic_list_2003, table2_size)
+        print(f"\nTotal Collisions for Table 2003 (Round {round_num}): {collisions_2003}")
+        total_collisions_2003 += collisions_2003
+
+    avg_1009 = total_collisions_1009 / rounds
+    avg_2003 = total_collisions_2003 / rounds
+
+    print("\n=== Final Summary ===")
+    print(f"Average Total Collisions for Table 1009: {avg_1009:.2f}")
+    print(f"Average Total Collisions for Table 2003: {avg_2003:.2f}")
+
+# === Execute ===
 if __name__ == "__main__":
     run_rounds()
