@@ -1,6 +1,9 @@
+import random
+from collections import defaultdict
+
+# === Keep Code 1: Hash + Birthplace ===
 def get_birthplace(bp_code):
     state_codes = {
-        # Malaysian states
         "01": "Johor", "21": "Johor", "22": "Johor", "23": "Johor", "24": "Johor",
         "02": "Kedah", "25": "Kedah", "26": "Kedah", "27": "Kedah",
         "03": "Kelantan", "28": "Kelantan", "29": "Kelantan",
@@ -17,39 +20,76 @@ def get_birthplace(bp_code):
         "14": "Kuala Lumpur", "54": "Kuala Lumpur", "55": "Kuala Lumpur", "56": "Kuala Lumpur", "57": "Kuala Lumpur",
         "15": "Labuan", "58": "Labuan",
         "16": "Putrajaya",
-        # Foreign countries (selected for brevity, expand as needed)
-        "60": "Brunei", "61": "Indonesia", "62": "Cambodia", "63": "Laos", "64": "Myanmar", "65": "Philippines",
-        "66": "Singapore", "67": "Thailand", "68": "Vietnam", "69": "Unknown (Foreign)", "70": "Unknown (Foreign)",
-        "71": "Born outside Malaysia (pre-2001)", "72": "Born outside Malaysia (pre-2001)",
-        "74": "China", "75": "India", "76": "Pakistan", "77": "Saudi Arabia", "78": "Sri Lanka",
-        "79": "Bangladesh", "82": "Unknown State", "91": "United States", "92": "Eastern Europe", "93": "Other Countries",
+        "60": "Brunei", "61": "Indonesia", "62": "Cambodia", "63": "Laos", "64": "Myanmar",
+        "65": "Philippines", "66": "Singapore", "67": "Thailand", "68": "Vietnam",
+        "69": "Unknown (Foreign)", "70": "Unknown (Foreign)", "71": "Born outside Malaysia (pre-2001)",
+        "72": "Born outside Malaysia (pre-2001)", "74": "China", "75": "India", "76": "Pakistan",
+        "77": "Saudi Arabia", "78": "Sri Lanka", "79": "Bangladesh", "82": "Unknown State",
+        "91": "United States", "92": "Eastern Europe", "93": "Other Countries",
         "98": "Stateless", "99": "No Info / Refugee"
     }
     return state_codes.get(bp_code, "Unknown")
 
-def ic_hash(ic_number):
-    # Validate
-    if not ic_number.isdigit() or len(ic_number) != 12:
-        raise ValueError("IC number must be a 12-digit string.")
-
-    # Format IC: YYMMDD-BP-####
-    formatted_ic = f"{ic_number[:6]}-{ic_number[6:8]}-{ic_number[8:]}"
-    print("Formatted IC:", formatted_ic)
-
-    # Get birthplace info
-    bp_code = ic_number[6:8]
-    birthplace = get_birthplace(bp_code)
-    print("Place of Birth:", birthplace)
-
-    # Folding hash technique: 3 parts of 4 digits
+def ic_hash(ic_number, table_size):
     part1 = int(ic_number[0:4])
     part2 = int(ic_number[4:8])
     part3 = int(ic_number[8:12])
     total = part1 + part2 + part3
-    hash_code = total % 1000
+    return total % table_size
 
-    print("Hash Code:", hash_code)
-    return hash_code
+def format_ic(ic_number):
+    return f"{ic_number[:6]}-{ic_number[6:8]}-{ic_number[8:]}"
 
-# Example usage
-ic_hash("990101145321")  # Example IC number
+def display_ic_info(ic_number, table_size):
+    formatted = format_ic(ic_number)
+    bp_code = ic_number[6:8]
+    birthplace = get_birthplace(bp_code)
+    hash_code = ic_hash(ic_number, table_size)
+    print(f"Formatted IC: {formatted}")
+    print(f"Place of Birth: {birthplace}")
+    print(f"Hash Code (mod {table_size}): {hash_code}")
+
+# === New for Code 2: Random generation + experiment ===
+
+valid_bp_codes = [
+    "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14",
+    "15", "16", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
+    "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46",
+    "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60",
+    "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "74", "75",
+    "76", "77", "78", "79", "82", "91", "92", "93", "98", "99"
+]
+
+def generate_random_ic():
+    yy = random.randint(50, 99)
+    mm = random.randint(1, 12)
+    dd = random.randint(1, 28)
+    bp = random.choice(valid_bp_codes)
+    suffix = random.randint(0, 9999)
+    return f"{yy:02}{mm:02}{dd:02}{bp}{suffix:04}"
+
+def insert_with_chaining(ic_list, table_size):
+    table = defaultdict(list)
+    collisions = 0
+    for ic in ic_list:
+        index = ic_hash(ic, table_size)
+        if table[index]:
+            collisions += 1
+        table[index].append(ic)
+    return collisions
+
+def run_rounds(rounds=10, num_ics=1000):
+    table_sizes = [1009, 2003]
+    for size in table_sizes:
+        print(f"\nHash Table Size: {size}")
+        total = 0
+        for i in range(1, rounds + 1):
+            ic_list = [generate_random_ic() for _ in range(num_ics)]
+            collisions = insert_with_chaining(ic_list, size)
+            print(f"  Round {i}: Collisions = {collisions}")
+            total += collisions
+        print(f"  ➤ Average Collisions: {total / rounds:.2f}")
+
+# === Run experiment ===
+if __name__ == "__main__":
+    run_rounds()
