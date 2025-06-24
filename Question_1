@@ -59,55 +59,30 @@ def generate_random_ic():
     suffix = random.randint(0, 9999)
     return f"{yy:02}{mm:02}{dd:02}{bp}{suffix:04}"
 
-def insert_and_show_table(ic_list, table_size):
+# Insert into hash table with separate chaining
+def insert_with_chaining(ic_list, table_size):
     table = defaultdict(list)
     collisions = 0
-
     for ic in ic_list:
         index = ic_hash(ic, table_size)
         if table[index]:
             collisions += 1
         table[index].append(ic)
-
-    print(f"\nHash Table with size {table_size}:")
-    for i in range(table_size):
-        if i in table:
-            line = f"table[{i}] --> " + " --> ".join(table[i])
-        else:
-            line = f"table[{i}]"
-        print(line)
-
     return collisions
 
-# === Main Run for Code 3 ===
-def run_rounds(rounds=10):
-    table1_size = 1009
-    table2_size = 2003
-    total_collisions_1009 = 0
-    total_collisions_2003 = 0
+# Run 10 rounds of testing
+def run_rounds(rounds=10, num_ics=1000):
+    table_sizes = [1009, 2003]
+    for size in table_sizes:
+        print(f"\nHash Table Size: {size}")
+        total = 0
+        for i in range(1, rounds + 1):
+            ic_list = [generate_random_ic() for _ in range(num_ics)]
+            collisions = insert_with_chaining(ic_list, size)
+            print(f"  Round {i}: Collisions = {collisions}")
+            total += collisions
+        print(f"  ➤ Average Collisions: {total / rounds:.2f}")
 
-    for round_num in range(1, rounds + 1):
-        print(f"\n=== Round {round_num} ===")
-
-        # Table 1009 run
-        ic_list_1009 = [generate_random_ic() for _ in range(1008)]
-        collisions_1009 = insert_and_show_table(ic_list_1009, table1_size)
-        print(f"\nTotal Collisions for Table 1009 (Round {round_num}): {collisions_1009}")
-        total_collisions_1009 += collisions_1009
-
-        # Table 2003 run
-        ic_list_2003 = [generate_random_ic() for _ in range(2002)]
-        collisions_2003 = insert_and_show_table(ic_list_2003, table2_size)
-        print(f"\nTotal Collisions for Table 2003 (Round {round_num}): {collisions_2003}")
-        total_collisions_2003 += collisions_2003
-
-    avg_1009 = total_collisions_1009 / rounds
-    avg_2003 = total_collisions_2003 / rounds
-
-    print("\n=== Final Summary ===")
-    print(f"Average Total Collisions for Table 1009: {avg_1009:.2f}")
-    print(f"Average Total Collisions for Table 2003: {avg_2003:.2f}")
-
-# === Execute ===
+# === Run Code 2 ===
 if __name__ == "__main__":
     run_rounds()
