@@ -72,7 +72,8 @@ def insert_and_show_table(ic_list, table_size):
     print(f"\nHash Table with size {table_size}:")
     for i in range(table_size):
         if i in table:
-            line = f"table[{i}] --> " + " --> ".join(table[i])
+            formatted_ics = " --> ".join(format_ic(ic) for ic in table[i])
+            line = f"table[{i}] --> {formatted_ics}"
         else:
             line = f"table[{i}]"
         print(line)
