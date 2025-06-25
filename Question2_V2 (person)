@@ -72,9 +72,4 @@ person5 = Person(
 
 people_profiles = [person1, person2, person3, person4, person5]
 
-for i, person in enumerate(people_profiles, start=1):
-    print(f"\n--- Profile {i} ---")
-    print(person)
 
-
-//save this file as Question2_V2//
