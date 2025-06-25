@@ -1,0 +1,77 @@
+class Person:
+    def __init__(self, username, name, gender, biography="", privacy="public"):
+
+        self.username = username
+        self.name = name
+        self.gender = gender
+        self.biography = biography
+        self.privacy = privacy.lower() if privacy.lower() in ["public", "private"] else "public"
+
+    def updateBiography(self, new_bio):
+        self.biography = new_bio
+
+    def defineGender(self, new_gender):
+        valid_genders = ["male", "female", "preferred not to say", "other"]
+        if new_gender.lower() in valid_genders:
+            self.gender = new_gender.capitalize()  # or use new_gender.title() for nicer format
+        else:
+            raise ValueError("Gender must be one of: 'Male', 'Female', 'Preferred not to say', or 'Other'.")
+
+    def __str__(self):
+        return (
+            f"Username: {self.username}\n"
+            f"Name: {self.name}\n"
+            f"Gender: {self.gender}\n"
+            f"Biography: {self.biography}\n"
+            f"Privacy: {self.privacy.capitalize()}"
+        )
+
+
+
+
+# Five example profiles for five people
+person1 = Person(
+    username="Hari",
+    name="Hari Tan",
+    gender="Male",
+    biography="Basketball lover ",
+    privacy="public"
+)
+
+person2 = Person(
+    username="Eunice Wong",
+    name="Wong YUng Shie ",
+    gender="Female",
+    biography=" gamersssss",
+    privacy="private"
+)
+
+person3 = Person(
+    username="TSY",
+    name="Tang Sin Yuan ",
+    gender="Male",
+    biography="Im a badminton loverrrr <3",
+    privacy="public"
+)
+
+person4 = Person(
+    username="Jh",
+    name="Tan Jun Hong",
+    gender="Prefer not to say",
+    biography="I love Advanced Algorithm",
+    privacy="private"
+)
+
+person5 = Person(
+    username="JS",
+    name="Lee Jen Sen ",
+    gender="Others",
+    biography="I like TikTok",
+    privacy="public"
+)
+
+people_profiles = [person1, person2, person3, person4, person5]
+
+for i, person in enumerate(people_profiles, start=1):
+    print(f"\n--- Profile {i} ---")
+    print(person)
