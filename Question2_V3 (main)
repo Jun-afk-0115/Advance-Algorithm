@@ -1,5 +1,5 @@
 from Question2_V1 import DirectedGraph
-from Question2_V2 import Person, person1, person2, person3, person4, person5
+from Question2_V2 import Person
 
 
 class SocialMediaApp:
@@ -27,6 +27,9 @@ class SocialMediaApp:
                 return user
         return None
 
+    def get_all_users(self):
+        return list(self.graph.adjacency_list.keys())
+
     def get_followers(self, username):
         user = self.find_user_by_username(username)
         if not user:
@@ -39,96 +42,135 @@ class SocialMediaApp:
             return self.graph.listOutgoingAdjacentVertex(user)
         return []
 
+    def view_profile(self, person):
+        if person.privacy == "public":
+            print(person)
+        else:
+            print(f"Username: {person.username}")
+            print(f"Name: {person.name}")
+            print("(This profile is private)")
+
+
+def create_user_from_input():
+    print("\n--- Create New Profile ---")
+    username = input("Enter username: ").strip()
+    name = input("Enter full name: ").strip()
+    gender = input("Enter gender (Male/Female/Other/Preferred not to say): ").strip()
+    biography = input("Enter biography: ").strip()
+    privacy = input("Enter privacy (public/private): ").strip()
+
+    try:
+        return Person(username, name, gender, biography, privacy)
+    except ValueError as e:
+        print("Error creating profile:", e)
+        return None
+
 
 def main():
     app = SocialMediaApp()
 
-    # Add 5 predefined users
-    users = [person1, person2, person3, person4, person5]
-    for person in users:
-        app.add_user(person)
+    # Initial users
+    initial_users = [
+        Person("Hari", "Hari Tan", "Male", "Basketball lover", "public"),
+        Person("Eunice Wong", "Wong Yung Shie", "Female", "gamersssss", "private"),
+        Person("TSY", "Tang Sin Yuan", "Male", "Im a badminton loverrrr <3", "public"),
+        Person("Jh", "Tan Jun Hong", "Preferred not to say", "I love Advanced Algorithm", "private"),
+        Person("JS", "Lee Jen Sen", "Other", "I like TikTok", "public")
+    ]
+
+    for user in initial_users:
+        app.add_user(user)
 
     while True:
-        print("\n===== Social Media App =====")
-        print("Choose a user by number:")
-        for i, user in enumerate(users, start=1):
-            print(f"{i}. {user.username}")
+        print("\n=== Social Media App ===")
+        print("1. View all usernames")
+        print("2. Select a user to interact with")
+        print("3. Add a new user profile")
         print("0. Exit")
 
-        try:
-            choice = int(input("Enter your choice: "))
-        except ValueError:
-            print("Please enter a valid number.")
-            continue
+        choice = input("Enter your choice: ").strip()
 
-        if choice == 0:
-            print("Goodbye!")
-            break
+        if choice == "1":
+            print("\n--- All Users ---")
+            for i, user in enumerate(app.get_all_users(), 1):
+                print(f"{i}. {user.username}")
 
-        if 1 <= choice <= len(users):
-            selected_user = users[choice - 1]
-            print(f"\n--- Selected: {selected_user.username} ---")
-            while True:
-                print("\nOptions:")
-                print("1. View Profile")
-                print("2. View Followers")
-                print("3. View Following")
-                print("4. Follow someone")
-                print("5. Back to user list")
+        elif choice == "2":
+            users = app.get_all_users()
+            print("\nSelect a user:")
+            for i, user in enumerate(users, 1):
+                print(f"{i}. {user.username}")
+            try:
+                user_index = int(input("Enter number: ")) - 1
+                if 0 <= user_index < len(users):
+                    selected = users[user_index]
+                    while True:
+                        print(f"\n--- {selected.username} ---")
+                        print("1. View Profile")
+                        print("2. View Followers")
+                        print("3. View Following")
+                        print("4. Follow Someone")
+                        print("5. Back")
 
-                try:
-                    sub_choice = int(input("Choose an option: "))
-                except ValueError:
-                    print("Invalid input. Try again.")
-                    continue
+                        action = input("Select option: ")
 
-                if sub_choice == 1:
-                    print("\n--- Profile Info ---")
-                    print(selected_user)
-                elif sub_choice == 2:
-                    print(f"\nFollowers of {selected_user.username}:")
-                    followers = app.get_followers(selected_user.username)
-                    if followers:
-                        for f in followers:
-                            print(f"- {f.username}")
-                    else:
-                        print("No followers.")
-                elif sub_choice == 3:
-                    print(f"\n{selected_user.username} is following:")
-                    followees = app.get_following(selected_user.username)
-                    if followees:
-                        for f in followees:
-                            print(f"- {f.username}")
-                    else:
-                        print("Not following anyone.")
-                elif sub_choice == 4:
-                    print("\nAvailable users to follow:")
-                    for i, user in enumerate(users, start=1):
-                        if user != selected_user:
-                            print(f"{i}. {user.username}")
-                    try:
-                        target_index = int(input("Enter number of person to follow: ")) - 1
-                        if 0 <= target_index < len(users):
-                            target_user = users[target_index]
-                            if target_user != selected_user:
-                                app.follow(selected_user.username, target_user.username)
+                        if action == "1":
+                            print("\n--- Profile ---")
+                            app.view_profile(selected)
+
+                        elif action == "2":
+                            print("\n--- Followers ---")
+                            followers = app.get_followers(selected.username)
+                            if followers:
+                                for f in followers:
+                                    print(f"- {f.username}")
                             else:
-                                print("You cannot follow yourself.")
+                                print("No followers.")
+
+                        elif action == "3":
+                            print("\n--- Following ---")
+                            following = app.get_following(selected.username)
+                            if following:
+                                for f in following:
+                                    print(f"- {f.username}")
+                            else:
+                                print("Not following anyone.")
+
+                        elif action == "4":
+                            print("\nWho do you want to follow?")
+                            for i, user in enumerate(users, 1):
+                                if user != selected:
+                                    print(f"{i}. {user.username}")
+                            try:
+                                follow_index = int(input("Enter number to follow: ")) - 1
+                                if 0 <= follow_index < len(users):
+                                    target = users[follow_index]
+                                    app.follow(selected.username, target.username)
+                                else:
+                                    print("Invalid selection.")
+                            except ValueError:
+                                print("Invalid input.")
+                        elif action == "5":
+                            break
                         else:
-                            print("Invalid choice.")
-                    except ValueError:
-                        print("Invalid input.")
-                elif sub_choice == 5:
-                    break
+                            print("Invalid option.")
                 else:
-                    print("Invalid option.")
+                    print("Invalid selection.")
+            except ValueError:
+                print("Invalid input.")
+
+        elif choice == "3":
+            new_user = create_user_from_input()
+            if new_user:
+                app.add_user(new_user)
+                print(f"User '{new_user.username}' added!")
+
+        elif choice == "0":
+            print("Exiting... Goodbye!")
+            break
         else:
-            print("Invalid user number.")
+            print("Invalid menu choice.")
 
 
 if __name__ == "__main__":
     main()
-
-
-
-//Save this file as Question2_V3//
