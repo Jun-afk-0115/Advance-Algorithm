@@ -1,0 +1,130 @@
+from Question2_V1 import DirectedGraph
+from Question2_V2 import Person, person1, person2, person3, person4, person5
+
+
+class SocialMediaApp:
+    def __init__(self):
+        self.graph = DirectedGraph()
+
+    def add_user(self, person):
+        self.graph.addVertex(person)
+
+    def follow(self, follower_username, followee_username):
+        follower = self.find_user_by_username(follower_username)
+        followee = self.find_user_by_username(followee_username)
+        if follower and followee and followee != follower:
+            if followee not in self.graph.adjacency_list[follower]:
+                self.graph.addEdge(follower, followee)
+                print(f"{follower.username} is now following {followee.username}.")
+            else:
+                print("Already following.")
+        else:
+            print("Invalid user or cannot follow self.")
+
+    def find_user_by_username(self, username):
+        for user in self.graph.adjacency_list.keys():
+            if user.username == username:
+                return user
+        return None
+
+    def get_followers(self, username):
+        user = self.find_user_by_username(username)
+        if not user:
+            return []
+        return [u for u, followings in self.graph.adjacency_list.items() if user in followings]
+
+    def get_following(self, username):
+        user = self.find_user_by_username(username)
+        if user:
+            return self.graph.listOutgoingAdjacentVertex(user)
+        return []
+
+
+def main():
+    app = SocialMediaApp()
+
+    # Add 5 predefined users
+    users = [person1, person2, person3, person4, person5]
+    for person in users:
+        app.add_user(person)
+
+    while True:
+        print("\n===== Social Media App =====")
+        print("Choose a user by number:")
+        for i, user in enumerate(users, start=1):
+            print(f"{i}. {user.username}")
+        print("0. Exit")
+
+        try:
+            choice = int(input("Enter your choice: "))
+        except ValueError:
+            print("Please enter a valid number.")
+            continue
+
+        if choice == 0:
+            print("Goodbye!")
+            break
+
+        if 1 <= choice <= len(users):
+            selected_user = users[choice - 1]
+            print(f"\n--- Selected: {selected_user.username} ---")
+            while True:
+                print("\nOptions:")
+                print("1. View Profile")
+                print("2. View Followers")
+                print("3. View Following")
+                print("4. Follow someone")
+                print("5. Back to user list")
+
+                try:
+                    sub_choice = int(input("Choose an option: "))
+                except ValueError:
+                    print("Invalid input. Try again.")
+                    continue
+
+                if sub_choice == 1:
+                    print("\n--- Profile Info ---")
+                    print(selected_user)
+                elif sub_choice == 2:
+                    print(f"\nFollowers of {selected_user.username}:")
+                    followers = app.get_followers(selected_user.username)
+                    if followers:
+                        for f in followers:
+                            print(f"- {f.username}")
+                    else:
+                        print("No followers.")
+                elif sub_choice == 3:
+                    print(f"\n{selected_user.username} is following:")
+                    followees = app.get_following(selected_user.username)
+                    if followees:
+                        for f in followees:
+                            print(f"- {f.username}")
+                    else:
+                        print("Not following anyone.")
+                elif sub_choice == 4:
+                    print("\nAvailable users to follow:")
+                    for i, user in enumerate(users, start=1):
+                        if user != selected_user:
+                            print(f"{i}. {user.username}")
+                    try:
+                        target_index = int(input("Enter number of person to follow: ")) - 1
+                        if 0 <= target_index < len(users):
+                            target_user = users[target_index]
+                            if target_user != selected_user:
+                                app.follow(selected_user.username, target_user.username)
+                            else:
+                                print("You cannot follow yourself.")
+                        else:
+                            print("Invalid choice.")
+                    except ValueError:
+                        print("Invalid input.")
+                elif sub_choice == 5:
+                    break
+                else:
+                    print("Invalid option.")
+        else:
+            print("Invalid user number.")
+
+
+if __name__ == "__main__":
+    main()
