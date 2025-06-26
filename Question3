@@ -1,7 +1,73 @@
 import random
+import threading
+import time
 
-def generate_random_numbers():
+# Generate 100 random numbers
+def generate_numbers():
     return [random.randint(0, 10000) for _ in range(100)]
 
-for num in generate_random_numbers():
-    print(num)
+# Thread class with timing
+class MyThread(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.start_ns = 0
+        self.end_ns = 0
+
+    def run(self):
+        self.start_ns = time.time_ns()
+        generate_numbers()
+        self.end_ns = time.time_ns()
+
+# Multithreaded round
+def multithread_round():
+    t1, t2, t3 = MyThread(), MyThread(), MyThread()
+    t1.start(), t2.start(), t3.start()
+    t1.join(), t2.join(), t3.join()
+    t_start = min(t1.start_ns, t2.start_ns, t3.start_ns)
+    t_end = max(t1.end_ns, t2.end_ns, t3.end_ns)
+    return t_end - t_start
+
+# Sequential round
+def sequential_round():
+    start = time.time_ns()
+    generate_numbers()
+    generate_numbers()
+    generate_numbers()
+    end = time.time_ns()
+    return end - start
+
+# Main function with formatted output
+def main():
+    mt_times = []
+    seq_times = []
+    print("\nRound-by-Round Performance Comparison:\n")
+    print("+--------+-------------------------+------------------------------+------------------------+")
+    print("| Round  | Multithreading Time (ns)| Non-Multithreading Time (ns) | Difference (ns)        |")
+    print("+--------+-------------------------+------------------------------+------------------------+")
+
+    for i in range(10):
+        mt = multithread_round()
+        seq = sequential_round()
+        diff = mt - seq
+        mt_times.append(mt)
+        seq_times.append(seq)
+        print(f"| {i+1:^6} | {mt:>23,} | {seq:>28,} | {diff:>22,} |")
+
+    print("+--------+-------------------------+------------------------------+------------------------+\n")
+    total_mt = sum(mt_times)
+    total_seq = sum(seq_times)
+    avg_mt = total_mt / 10
+    avg_seq = total_seq / 10
+    total_diff = total_mt - total_seq
+    avg_diff = avg_mt - avg_seq
+
+    print("Summary of Results:")
+    print("+-------------+------------------------+------------------------------+------------------------+")
+    print("|   Metric    |  Multithreading (ns)   | Non-Multithreading (ns)      | Difference (ns)        |")
+    print("+-------------+------------------------+------------------------------+------------------------+")
+    print(f"| Total Time  | {total_mt:>22,} | {total_seq:>28,} | {total_diff:>22,} |")
+    print(f"| Average Time| {avg_mt:>22,.1f} | {avg_seq:>28,.1f} | {avg_diff:>22,.1f} |")
+    print("+-------------+------------------------+------------------------------+------------------------+\n")
+
+if __name__ == "__main__":
+    main()
