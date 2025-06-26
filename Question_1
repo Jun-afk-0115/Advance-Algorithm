@@ -93,26 +93,34 @@ def run_rounds(rounds=10):
         # Table 1009
         ic_list_1009 = [generate_random_ic() for _ in range(1008)]
         c1009 = insert_and_show_table(ic_list_1009, table1_size)
+        rate_1009 = (c1009 / len(ic_list_1009)) * 100
         print(f"\nTotal Collisions for Table 1009 (Round {round_num}): {c1009}")
+        print(f"Collision Rate for Table 1009: {rate_1009:.2f}%")
         collisions_1009.append(c1009)
 
         # Table 2003
         ic_list_2003 = [generate_random_ic() for _ in range(2002)]
         c2003 = insert_and_show_table(ic_list_2003, table2_size)
+        rate_2003 = (c2003 / len(ic_list_2003)) * 100
         print(f"\nTotal Collisions for Table 2003 (Round {round_num}): {c2003}")
+        print(f"Collision Rate for Table 2003: {rate_2003:.2f}%")
         collisions_2003.append(c2003)
 
     total_1009 = sum(collisions_1009)
     total_2003 = sum(collisions_2003)
     avg_1009 = total_1009 / rounds
     avg_2003 = total_2003 / rounds
+    avg_rate_1009 = (avg_1009 / 1008) * 100
+    avg_rate_2003 = (avg_2003 / 2002) * 100
 
     print("\n=== Final Summary ===")
     print(f"Table 1009 - Total Collisions (10 rounds): {total_1009}")
     print(f"Table 1009 - Average Collisions: {avg_1009:.2f}")
+    print(f"Table 1009 - Average Collision Rate: {avg_rate_1009:.2f}%")
     print()
     print(f"Table 2003 - Total Collisions (10 rounds): {total_2003}")
     print(f"Table 2003 - Average Collisions: {avg_2003:.2f}")
+    print(f"Table 2003 - Average Collision Rate: {avg_rate_2003:.2f}%")
 
 # === Execute ===
 if __name__ == "__main__":
