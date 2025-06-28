@@ -1,5 +1,5 @@
 from Question2_V1 import DirectedGraph
-from Question2_V2 import Person
+from Question2_V2 import Person, people_profiles
 
 
 class InGram:
@@ -24,46 +24,58 @@ class InGram:
     def view_profile(self, person):
         print("\n==============================")
         print(f"Name: {person.name}")
+        print("==============================")
         if person.privacy == "public":
             print(f"Gender: {person.gender}")
             print(f"Biography: {person.biography}")
-            print(f"Privacy: {person.privacy}")
+            print(f"Privacy: {person.privacy.capitalize()}")
         else:
             print("This profile is private.")
+
+    def create_user_profile(self):
+        print("\n==============================")
+        print("Create New User Profile")
+        print("==============================")
+
+        username = input("Enter username: ")
+        name = input("Enter full name: ")
+        gender = input("Enter gender (Male/Female/Preferred not to say/Other): ")
+        biography = input("Enter a short biography: ")
+        privacy = input("Privacy setting (Public/Private): ")
+
+        try:
+            new_person = Person(username, name, gender, biography, privacy)
+            self.add_user(new_person)
+            print("Profile successfully created!")
+        except ValueError as e:
+            print(f"Error creating profile: {e}")
 
 
 def main():
     app = InGram()
 
-    # Use your own profile data
-    users = [
-        Person("Hari", "Hari Tan", "Male", "Basketball lover", "public"),
-        Person("Eunice Wong", "Wong Yung Shie", "Female", "gamersssss", "private"),
-        Person("TSY", "Tang Sin Yuan", "Male", "Im a badminton loverrrr <3", "public"),
-        Person("Jh", "Tan Jun Hong", "Prefer not to say", "I love Advanced Algorithm", "private"),
-        Person("JS", "Lee Jen Sen", "Others", "I like TikTok", "public")
-    ]
-
-    for user in users:
+    # Add default test users
+    for user in people_profiles:
         app.add_user(user)
 
-    # Example followers (you can adjust)
-    app.add_edge(users[2], users[0])  # TSY -> Hari
-    app.add_edge(users[3], users[0])  # Jh -> Hari
-    app.add_edge(users[4], users[2])  # JS -> TSY
+    # Create follower relationships
+    app.add_edge(people_profiles[2], people_profiles[0])  # TSY -> Hari
+    app.add_edge(people_profiles[3], people_profiles[0])  # Jh -> Hari
+    app.add_edge(people_profiles[4], people_profiles[2])  # JS -> TSY
 
     while True:
         print("\n" + "*" * 50)
         print("Welcome to InGram, Your Social Media App!")
         print("*" * 50)
-        print("1. View names of all profiles")
-        print("2. View details for any profile")
-        print("3. View followers of any profile")
-        print("4. View followed accounts of any profile")
-        print("5. Quit")
+        print("1. View profiles")
+        print("2. View details ")
+        print("3. View followers ")
+        print("4. View following ")
+        print("5. Create new user profile")
+        print("6. Quit")
         print("*" * 50)
 
-        choice = input("Enter your choice (1 - 5): ")
+        choice = input("Enter your choice (1 - 6): ")
 
         if choice == "1":
             print("\n==============================")
@@ -90,12 +102,20 @@ def main():
             try:
                 idx = int(input("Select profile to view followers (1 - 5): "))
                 if 1 <= idx <= len(users_list):
-                    followers = app.get_followers(users_list[idx - 1])
-                    print("\nFollower List:")
-                    for f in followers:
-                        print(f"- {f.name}")
+                    selected_user = users_list[idx - 1]
+                    if selected_user.privacy.lower() == "private":
+                        print("\nThis profile is private.")
+                    else:
+                        followers = app.get_followers(selected_user)
+                        print("\nFollower List:")
+                        if followers:
+                            for f in followers:
+                                print(f"- {f.name}")
+                        else:
+                            print("No followers yet.")
             except:
                 print("Invalid input.")
+
 
         elif choice == "4":
             users_list = app.get_all_users()
@@ -104,16 +124,28 @@ def main():
             try:
                 idx = int(input("Select profile to view followings (1 - 5): "))
                 if 1 <= idx <= len(users_list):
-                    followings = app.get_following(users_list[idx - 1])
-                    print("\nFollowing List:")
-                    for f in followings:
-                        print(f"- {f.name}")
+                    selected_user = users_list[idx - 1]
+                    if selected_user.privacy.lower() == "private":
+                        print("\nThis profile is private.")
+                    else:
+                        followings = app.get_following(selected_user)
+                        print("\nFollowing List:")
+                        if followings:
+                            for f in followings:
+                                print(f"- {f.name}")
+                        else:
+                            print("Not following anyone.")
             except:
                 print("Invalid input.")
 
+
         elif choice == "5":
+            app.create_user_profile()
+
+        elif choice == "6":
             print("Thank you for using InGram!")
             break
+
         else:
             print("Invalid choice. Try again.")
 
