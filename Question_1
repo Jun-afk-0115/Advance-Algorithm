@@ -38,8 +38,8 @@ def ic_hash(ic_number, table_size):
     if not ic_number.isdigit():
         return -1
 
-    part1 = int(ic_number[0:4])
-    part2 = int(ic_number[4:8])
+    part1 = int(ic_number[0:6])
+    part2 = int(ic_number[6:8])
     part3 = int(ic_number[8:12])
     total = part1 + part2 + part3
     return total % table_size
@@ -59,7 +59,7 @@ valid_bp_codes = [
 ]
 
 def generate_random_ic():
-    yy = random.randint(50, 99)
+    yy = random.randint(00, 99)
     mm = random.randint(1, 12)
     dd = random.randint(1, 28)
     bp = random.choice(valid_bp_codes)
