@@ -31,6 +31,13 @@ def get_birthplace(bp_code):
     return state_codes.get(bp_code, "Unknown")
 
 def ic_hash(ic_number, table_size):
+    if not isinstance(ic_number, str):
+        return -1
+    if len(ic_number) != 12:
+        return -1
+    if not ic_number.isdigit():
+        return -1
+
     part1 = int(ic_number[0:4])
     part2 = int(ic_number[4:8])
     part3 = int(ic_number[8:12])
