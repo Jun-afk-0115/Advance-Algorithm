@@ -71,5 +71,3 @@ person5 = Person(
 )
 
 people_profiles = [person1, person2, person3, person4, person5]
-
-
